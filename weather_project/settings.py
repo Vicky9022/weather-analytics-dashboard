@@ -56,11 +56,12 @@ WSGI_APPLICATION = 'weather_project.wsgi.application'
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app', '.render.com', '.herokuapp.com']
 # Database - PostgreSQL
 DATABASES = {
-    'default': {
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    if os.getenv('DATABASE_URL') else {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'weather_db'),
         'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'Vikas'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
