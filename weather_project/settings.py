@@ -53,7 +53,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'weather_project.wsgi.application'
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app', '.render.com', '.herokuapp.com']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.railway.app',
+    '.render.com',
+    '.herokuapp.com',
+    'weather-analytics-dashboard-qy7d.onrender.com'
+]
+
 # Database - PostgreSQL
 DATABASES = {
     'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
