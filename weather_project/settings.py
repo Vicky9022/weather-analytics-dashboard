@@ -4,7 +4,7 @@ import dj_database_url
 
 # Base directory
 
-BASE_DIR = Path(**file**).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 
@@ -72,12 +72,16 @@ TEMPLATES = [
 ]
 
 # Database
-
 DATABASES = {
-'default': dj_database_url.parse(os.getenv(
-'DATABASE_URL',
-'postgresql://weather_db_vyhi_user:Ae1HPI5LcAufzPnJzEN3x4cGZ8XeX6eB@dpg-d450l895pdvs73c2omg0-a.oregon-postgres.render.com/weather_db_vyhi'
-))
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    if os.getenv('DATABASE_URL') else {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'weather_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+    }
 }
 
 # Password validation
