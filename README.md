@@ -301,7 +301,7 @@ The analytics endpoint returns data in a format optimized for charting libraries
 | Variable | Description | Required |
 |----------|-------------|----------|
 | DJANGO_SECRET_KEY | Django secret key | Yes |
-| DEBUG | Debug mode (True/False) | No |
+| DEBUG | Debug mode (True/False) | Yes |
 | DB_NAME | Database name | Yes |
 | DB_USER | Database user | Yes |
 | DB_PASSWORD | Database password | Yes |
