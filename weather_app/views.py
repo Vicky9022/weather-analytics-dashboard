@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,11 +13,6 @@ from .serializers import (
     WeatherRecordSerializer, WeatherRecordCreateSerializer
 )
 
-# Simple homepage for root URL
-def home(request):
-    return HttpResponse("Welcome to Weather Analytics Dashboard!")
-
-# ---------------- API ViewSets ----------------
 
 class CityViewSet(viewsets.ModelViewSet):
     queryset = City.objects.all()
@@ -32,10 +25,13 @@ class CityViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def fetch_weather(self, request, pk=None):
+        """
+        Fetch current weather from OpenWeatherMap API and save to database
+        """
         city = self.get_object()
         api_key = os.getenv('OPENWEATHER_API_KEY', 'your_api_key_here')
         
-        url = "http://api.openweathermap.org/data/2.5/weather"
+        url = f"http://api.openweathermap.org/data/2.5/weather"
         params = {
             'lat': city.latitude,
             'lon': city.longitude,
@@ -48,6 +44,7 @@ class CityViewSet(viewsets.ModelViewSet):
             response.raise_for_status()
             data = response.json()
 
+            # Create weather record from API data
             weather_record = WeatherRecord.objects.create(
                 city=city,
                 temperature=data['main']['temp'],
@@ -89,6 +86,7 @@ class WeatherRecordViewSet(viewsets.ModelViewSet):
 
         if city_id:
             queryset = queryset.filter(city_id=city_id)
+        
         if days:
             try:
                 days_int = int(days)
@@ -96,17 +94,24 @@ class WeatherRecordViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(recorded_at__gte=start_date)
             except ValueError:
                 pass
+
         return queryset
 
     @action(detail=False, methods=['get'])
     def analytics(self, request):
+        """
+        Get weather analytics and statistics
+        """
         city_id = request.query_params.get('city_id')
         days = int(request.query_params.get('days', 7))
+        
         start_date = timezone.now() - timedelta(days=days)
         queryset = WeatherRecord.objects.filter(recorded_at__gte=start_date)
+        
         if city_id:
             queryset = queryset.filter(city_id=city_id)
 
+        # Calculate statistics
         stats = queryset.aggregate(
             avg_temperature=Avg('temperature'),
             max_temperature=Max('temperature'),
@@ -117,6 +122,7 @@ class WeatherRecordViewSet(viewsets.ModelViewSet):
             total_records=Count('id')
         )
 
+        # Get daily averages for visualization
         daily_data = []
         for i in range(days):
             day_start = start_date + timedelta(days=i)
@@ -135,6 +141,7 @@ class WeatherRecordViewSet(viewsets.ModelViewSet):
                 'avg_humidity': round(day_avg['avg_humidity'], 2) if day_avg['avg_humidity'] else None
             })
 
+        # Get city-wise summary
         city_summary = []
         if not city_id:
             cities = City.objects.all()
